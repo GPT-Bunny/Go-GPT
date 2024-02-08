@@ -1,0 +1,109 @@
+
+/* 颜色主题 */
+:root {
+  --primary-color: #00bf33; /* 蓝色系 */
+  --background-color: #000000; /* 深灰背景 */
+  --text-color: #bbbbbb; /* 深灰文本 */
+  --active-text-color: #21ffb5; /* 白色激活文本 */
+  --active-background-color: #256759; /* 激活链接背景色 */
+  --inactive-background-color: #4d4d4d; /* 未激活链接背景色 */
+}
+
+/* 导航栏样式 */
+.nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--background-color);
+  font-size: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000; /* 设置较高的 z-index 值 */
+}
+
+
+/* 导航链接样式 */
+.nav-link {
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 5px 20px;
+  margin: 0 5px;
+  transition: color 0.3s, background-color 0.3s;
+  font-size: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  display: flex;
+  align-items: center; /* 让图标和文本垂直居中 */
+}
+
+.nav-link i {
+  font-size: 16px;
+  margin-right: 5px;
+}
+
+/* 激活链接样式 */
+.nav-link.router-link-active {
+  color: var(--active-text-color);
+  background-color: var(--active-background-color);
+}
+
+/* 未激活链接样式 */
+.nav-link:not(.router-link-active):hover {
+  background-color: var(--inactive-background-color);
+}
+
+.login-button {
+  margin-right: 20px; /* 调整按钮右侧的间距 */
+}
+
+.login-button button {
+  padding: 5px 10px;
+  font-size: 16px;
+  background-color: var(--active-background-color);
+  color: var(--active-text-color);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin-right: 20px; /* 调整 logo 和文本之间的间距 */
+}
+
+.logo {
+  width: 40px; /* 调整 logo 的宽度 */
+  height: 40px; /* 调整 logo 的高度 */
+  margin-right: 10px; /* 调整 logo 和文本之间的间距 */
+}
+
+.logo-text {
+  font-size: 18px; /* 调整文本的字体大小 */
+  font-weight: bold; /* 调整文本的字体粗细 */
+  color: #ffffff;
+}
+
+.login-button {
+
+
+
+  color: #ffffff;
+  margin-left: auto; /* 将登录按钮推到最右侧 */
+}
+
+.login-button a {
+  padding: 5px 10px;
+  font-size: 16px;
+  background-color: var(--active-background-color);
+  color: var(--active-text-color);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none; /* 添加这一行，确保样式应用到 <router-link> 上 */
+}
