@@ -11,27 +11,27 @@ const router = createRouter({
         {
           path: 'Nav',
           name: 'Nav',
-          component: () => import('../views/Nav.vue'),
+          component: () => import('@/views/Nav.vue'),
         },
         {
           path: 'Chat',
           name: 'Chat',
-          component: () => import('../views/Chat.vue'),
+          component: () => import('@/views/Chat.vue'),
         },
         {
           path: 'draw',
           name: 'draw',
-          component: () => import('../views/draw.vue'),
+          component: () => import('@/views/draw.vue'),
         },
         {
           path: 'home',
           name: 'home',
-          component: () => import('../views/home.vue'),
+          component: () => import('@/views/home.vue'),
         },
         {
           path: '/Login',
           name: 'Login',
-          component: () => import('../views/Login.vue'),
+          component: () => import('@/views/Login.vue'),
         },
       ],
     },

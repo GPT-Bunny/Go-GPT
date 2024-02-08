@@ -2,7 +2,7 @@
     <h1 class="chat-title">
       <p></p>聊天标题
     </h1>
-  
+    <hr>
     <br>
 
   </template>

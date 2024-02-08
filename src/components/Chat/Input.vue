@@ -1,18 +1,31 @@
+<!-- InputBox.vue -->
 <template>
-  <div>
-    <!-- 消息输入框 -->
-    <input v-model="userInput" @keyup.enter="sendMessage" placeholder="输入消息..." />
-    <!-- 发送按钮 -->
-    <button @click="sendMessage">发送</button>
+  <div class="input-container"  style="">
+    <n-input type="text" placeholder="可以清除" clearable />
+    <n-button strong secondary type="warning" >
+      发送
+    </n-button>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue';
 
-const userInput = ref(''); // 用户输入的消息
+const inputValue = ref('');
 
-const sendMessage = () => {
-  // 发送消息的逻辑
+const submit = () => {
+  emit('submit', inputValue.value);
 };
 </script>
+
+<style scoped>
+.input-container {
+  display: flex;
+  align-items: center;
+}
+
+.input-container n-input {
+  margin-right: 20px; /* 调整输入框与发送按钮之间的间距 */
+}
+</style>

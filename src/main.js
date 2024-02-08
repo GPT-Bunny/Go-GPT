@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faHome, faComment, faPaintBrush, faUsers } from '@fortawesome/free-solid-svg-icons';
 import MarkdownIt from 'markdown-it';
 
+import naive from 'naive-ui'
 const app = createApp(App);
 
 app.use(createPinia());
@@ -27,5 +28,7 @@ const md = new MarkdownIt();
 const markdownText = '# Hello, *world*!';
 const htmlText = md.render(markdownText);
 
+
+app.use(naive)
 // 将渲染后的 HTML 字符串传递给 Vue 组件
 app.config.globalProperties.$markdown = htmlText;

@@ -1,33 +1,33 @@
+<!-- ChatList.vue -->
 <template>
-  <div>
-    <h2>历史聊天记录</h2>
+  <div class="chat-list">
+    <n-button strong secondary type="warning" style="width: 100%;">
+      新建对话
+    </n-button>
     <ul>
-      <li v-for="message in messages" :key="message.id">
-        <strong>{{ message.sender }}</strong>: {{ message.content }}
+      <n-divider />
+      <li v-for="(chat, index) in chatList" :key="index" @click="selectChat(chat)">
+        {{ chat.title }}
       </li>
     </ul>
-    <button @click="createNewChat">新建对话</button>
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    messages: {
-      type: Array,
-      required: true
-    }
-  },
-  methods: {
-    createNewChat() {
-      // 触发新建对话的操作，可以是打开一个新对话窗口、跳转到新对话页面等
-      console.log('新建对话');
-      // 这里可以添加具体的新建对话操作逻辑
-    }
-  }
-}
+<script setup>
+import { ref } from 'vue';
+
+const chatList = ref([
+  { id: 1, title: 'Chat 1' },
+  { id: 2, title: 'Chat 2' },
+  { id: 3, title: 'Chat 3' },
+]);
+
+const selectChat = (chat) => {
+  console.log('Selected chat:', chat);
+  // Handle the selection logic here
+};
 </script>
 
-<style>
-/* 样式可以根据需求进行调整 */
+<style scoped>
+/* Your CSS styles here */
 </style>
