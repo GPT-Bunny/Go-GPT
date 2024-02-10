@@ -1,9 +1,11 @@
 <template>
   <div class="container">
     <div class="chat-container">
+
+      <!-- 左侧边栏 -->
       <div v-if="!isSmallScreen && isSidebarVisible" class="sidebar">
         <n-button strong secondary round type="primary" @click="createChat" class="create-chat-btn">+ 新建聊天</n-button>
-        <div class="chat-list-container">
+        <n-scrollbar style="max-height: 800px">
           <div v-for="(chat, index) in chats" :key="index">
             <div class="chat-header">
               <button @click="selectChat(index)" :class="{ 'active': index === selectedChatIndex }" class="chat-btn">{{
@@ -11,15 +13,19 @@
               <span class="edit-icon" @click="editChatTitle(index)">&#9998;</span>
             </div>
           </div>
-        </div>
+        </n-scrollbar>
       </div>
 
+      <!-- 右侧区域 -->
+      <!-- 右侧标题 -->
       <div class="chat-window">
-        <div class="title-bar">
+        <div class="title-bar" style="border-bottom: 1px solid #ccc;">
           <h3 class="chat-title">{{ selectedChatTitle }}</h3>
-            <span class="icon-wrapper" @click="toggleSidebar"><i class="fas fa-list"></i></span>
+          <span class="icon-wrapper" @click="toggleSidebar"><i class="fas fa-list"></i></span>
         </div>
-        <div class="messages" ref="messagesContainer" v-show="isChatListVisible">
+
+        <!-- 聊天内容 -->
+        <n-scrollbar class="messages" ref="messagesContainer" v-show="isChatListVisible">
           <!-- 机器人回复的消息 -->
           <div v-for="(message, index) in selectedChat.messages" :key="index" class="message">
             <div class="message-avatar">
@@ -32,19 +38,22 @@
               </div>
               <!-- 仅机器人回复的消息包含复制按钮 -->
               <div v-if="message.sender === 'bot'">
-                <n-button strong secondary circle type="warning"  size="mini" style="background-color: transparent;" i class="fas fa-copy fa-sm  copy-icon" @click="copyMessage(message.content)" title="复制内容"  ></n-button>
+                <n-button strong secondary circle type="warning" size="mini" style="background-color: transparent;" i
+                  class="fas fa-copy fa-sm  copy-icon" @click="copyMessage(message.content)" title="复制内容"></n-button>
               </div>
             </div>
           </div>
-        </div>
+        </n-scrollbar>
+
+        <!-- 输入框 -->
         <n-card size="small" class="input-area">
           <div class="clear-button-area">
-            <n-button strong secondary round type="info" @click="clearChat" >清空</n-button>
+            <n-button strong secondary round type="info" @click="clearChat">清空</n-button>
           </div>
           <div class="send-message-area">
-            <textarea v-model="newMessage" @keydown="handleKeyPress" placeholder="输入消息..." rows="4"
+            <textarea v-model="newMessage" @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4"
               style="resize: none;"></textarea>
-              <n-button strong secondary round type="primary" @click="sendMessage" class="send-btn">发送</n-button>
+            <!-- <n-button strong secondary round type="primary" @click="sendMessage" class="send-btn">发送</n-button> -->
           </div>
         </n-card>
       </div>
@@ -157,6 +166,9 @@ const toggleSidebar = () => {
 <style scoped>
 /* 添加标题栏样式 */
 .title-bar {
+  padding: 10px;
+  height: auto;
+  min-height: 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -166,6 +178,7 @@ const toggleSidebar = () => {
 
 /* 消息样式 */
 .message {
+  margin-top: 25px;
   display: flex;
   align-items: center;
   margin-bottom: 10px;
@@ -214,7 +227,7 @@ const toggleSidebar = () => {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  background-color: #17204b;
+  background-color: #171717;
   /* 墨绿色背景 */
   transition: width 0.3s ease;
   /* 添加过渡效果 */
@@ -233,27 +246,36 @@ const toggleSidebar = () => {
   border: none;
   border-radius: 5px;
   background-color: #1b8a72;
-  /* 按钮背景色 */
   color: rgb(0, 255, 195);
   cursor: pointer;
   margin-bottom: 20px;
-  /* 新建聊天按钮下边距 */
+
 }
+
 .icon-wrapper {
-  background-color: #e8e8e8; /* 设置背景色 */
-  padding: 5px; /* 设置内边距 */
-  width: 30px; /* 设置宽度 */
-  height: 30px; /* 设置高度 */
-  border-radius: 50%; /* 设置圆角半径 */
-  display: flex; /* 让内容居中 */
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
+  background-color: #e8e8e8;
+  /* 设置背景色 */
+  padding: 5px;
+  /* 设置内边距 */
+  width: 30px;
+  /* 设置宽度 */
+  height: 30px;
+  /* 设置高度 */
+  border-radius: 50%;
+  /* 设置圆角半径 */
+  display: flex;
+  /* 让内容居中 */
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
   cursor: pointer;
   color: #000000;
 }
 
 .icon-wrapper:hover {
-  background-color: #dbdbdb; /* 设置鼠标悬停时的背景色 */
+  background-color: #dbdbdb;
+  /* 设置鼠标悬停时的背景色 */
 }
 
 
@@ -276,7 +298,7 @@ const toggleSidebar = () => {
 .edit-icon {
   cursor: pointer;
   margin-left: 10px;
-  color: #00cc66;
+  color: #ffffff;
   /* 修改图标颜色 */
 }
 
@@ -288,6 +310,7 @@ const toggleSidebar = () => {
   align-items: stretch;
   padding: 20px;
   background-color: #ececec;
+
   /* 左侧侧边栏的背景色 */
 }
 
@@ -321,13 +344,13 @@ textarea {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 13px;
   margin-top: 10px;
   height: 100px;
   /* 固定输入框高度为 100 像素 */
 }
 
-button {
+n-button {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -360,12 +383,6 @@ button {
   }
 }
 
-.chat-list-container {
-  overflow-y: auto;
-  max-height: 800px;
-  /* 限制聊天记录列表的最大高度 */
-}
-
 .title-bar {
   display: flex;
   justify-content: space-between;
@@ -384,13 +401,16 @@ button {
   flex: 1;
   overflow-y: auto;
   max-height: 800px;
-  padding: 10px; /* 添加内边距 */
-  background-color: #ececec; /* 设置背景色 */
+  padding: 10px;
+  /* 添加内边距 */
+  background-color: #ececec;
+  /* 设置背景色 */
 }
 
 .message {
   display: flex;
-  align-items: flex-start; /* 在交叉轴上顶部对齐 */
+  align-items: flex-start;
+  /* 在交叉轴上顶部对齐 */
   margin-bottom: 10px;
 }
 
@@ -407,7 +427,8 @@ button {
 .user-message,
 .bot-message {
   display: flex;
-  flex-direction: column; /* 将消息内容垂直排列 */
+  flex-direction: column;
+  /* 将消息内容垂直排列 */
   background-color: #d6d6d6;
   padding: 10px;
   border-radius: 5px;
@@ -429,6 +450,7 @@ button {
 }
 
 .copy-icon {
+  margin-left: 10px;
   margin-top: 10px;
 }
 
