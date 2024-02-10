@@ -25,7 +25,12 @@ const submit = () => {
   align-items: center;
 }
 
-.input-container n-input {
-  margin-right: 20px; /* 调整输入框与发送按钮之间的间距 */
+
+.n-input{
+  height: auto;
+  min-height: 100px;
+}
+.n-button{
+  height: 50px;
 }
 </style>

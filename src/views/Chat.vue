@@ -1,5 +1,5 @@
 <template>
-  <n-flex justify="space-between" style="height: 100%;padding-top: 50px;">
+  <n-flex justify="space-between" >
        <!-- 侧边栏 -->
     <n-layout has-sider>
       <n-layout-sider 
@@ -14,10 +14,10 @@
       </n-layout-sider>
 
          <!-- 对话内容 -->
-      <n-layout-content style="min-height: 1000px;min-width: 700px;width: auto;">
+      <n-layout-content >
 
            <Title />
-           <Display style="min-height: 800px;"/>
+           <Display   />
 
            <Input  />
       </n-layout-content>
@@ -35,3 +35,28 @@ import  Title  from  '@/components/Chat/Title.vue'
 
 
 
+<style scoped>
+/* 全局布局和颜色 */
+.n-flex{
+  flex: 1;
+}
+
+.n-layout-sider {
+  flex: 1;
+  color: #ffffff;
+  background-color: #050a25;
+  height: 100vh;
+  padding-top: 90px;
+
+}
+
+.n-layout-content{
+  padding: 30px;
+  padding-top: 90px;
+  background-color: #050a25;
+  color: #ffffff;
+
+}
+
+
+</style>

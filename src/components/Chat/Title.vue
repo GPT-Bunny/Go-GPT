@@ -3,7 +3,6 @@
       <p></p>聊天标题
     </h1>
     <hr>
-    <br>
 
   </template>
   
@@ -15,7 +14,7 @@
   
   <style scoped>
   .chat-title {
-    color: #000000;
+    color: #ffffff;
     font-size: 24px;
     text-align: center;
   }
