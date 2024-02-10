@@ -1,8 +1,5 @@
 <template>
-    <h1 class="chat-title">
-      <p></p>聊天标题
-    </h1>
-    <hr>
+        聊天标题
 
   </template>
   
@@ -12,13 +9,5 @@
   }
   </script>
   
-  <style scoped>
-  .chat-title {
-    color: #ffffff;
-    font-size: 24px;
-    text-align: center;
-  }
-  
-  /* 其他样式可以继续添加 */
-  </style>
+
   

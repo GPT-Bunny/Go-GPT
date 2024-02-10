@@ -1,6 +1,7 @@
 <template>
+  <div  class="div">
   <n-flex justify="space-between" >
-       <!-- 侧边栏 -->
+    <!-- 侧边栏 -->
     <n-layout has-sider>
       <n-layout-sider 
         collapse-mode="transform"
@@ -10,53 +11,29 @@
         content-style="padding: 24px;"
         bordered
       >
-         <List />
+        <List />
       </n-layout-sider>
 
-         <!-- 对话内容 -->
-      <n-layout-content >
-
-           <Title />
-           <Display   />
-
-           <Input  />
+      <!-- 对话内容 -->
+      <n-layout-content class="content">
+        <Title />
+        <n-divider />
+        <Display />
+        <n-divider />
+        <Input />
       </n-layout-content>
     </n-layout>
   </n-flex>
+</div>
 </template>
 
-
 <script setup>
-import  List  from  '@/components/Chat/List.vue'
-import  Display  from  '@/components/Chat/Display.vue'
-import  Input  from  '@/components/Chat/Input.vue'
-import  Title  from  '@/components/Chat/Title.vue'
+import List from '@/components/Chat/List.vue'
+import Display from '@/components/Chat/Display.vue'
+import Input from '@/components/Chat/Input.vue'
+import Title from '@/components/Chat/Title.vue'
 </script>
 
-
-
-<style scoped>
-/* 全局布局和颜色 */
-.n-flex{
-  flex: 1;
-}
-
-.n-layout-sider {
-  flex: 1;
-  color: #ffffff;
-  background-color: #050a25;
-  height: 100vh;
-  padding-top: 90px;
-
-}
-
-.n-layout-content{
-  padding: 30px;
-  padding-top: 90px;
-  background-color: #050a25;
-  color: #ffffff;
-
-}
-
-
+<style  scoped>
+@import url(Chat.css);
 </style>

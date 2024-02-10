@@ -1,0 +1,22 @@
+.div{
+    background-color: rgb(23, 23, 56);
+    height: auto;
+    padding-top: 80px;
+}
+.n-flex {
+    padding: 30px; /* 设置内边距 */
+    height: 100%;
+}
+  
+  /* 侧边栏样式 */
+  .n-layout-sider {
+    color: #ffffff;
+    background-color: #050a25;
+  }
+  
+  /* 对话内容样式 */
+  .n-layout-content {
+    padding: 40px; /* 设置内边距 */
+    background-color: #050a25;
+    color: #ffffff;
+  }

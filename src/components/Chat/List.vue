@@ -1,6 +1,6 @@
 <!-- ChatList.vue -->
 <template>
-  <div class="chat-list">
+  <div class="list">
     <n-button strong secondary type="warning" style="width: 100%;">
       新建对话
     </n-button>
