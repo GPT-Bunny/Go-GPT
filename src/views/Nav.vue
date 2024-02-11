@@ -4,11 +4,10 @@
         <img src="@/assets/32x32.png" alt="Logo" class="logo">
         <p class="logo-text">BUNNY</p>
       </div>
-  
       <router-link to="/home" class="nav-link">首页</router-link>
       <router-link to="/Chat" class="nav-link"><i class="fa fa-comment-alt"></i><n-dropdown :options="options">聊天</n-dropdown></router-link>
       <router-link to="/draw" class="nav-link">绘画</router-link>
-      <router-link to="/chat" class="nav-link login-button">登录</router-link>
+      <router-link to="/chat" class="nav-link login-button"> 登录</router-link>
     </nav>
 
 

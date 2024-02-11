@@ -7,7 +7,10 @@ const theme = ref('light');
 </script>
 
 <template>
-  <RouterView />
+    <n-message-provider>
+      <RouterView />
+
+    </n-message-provider>
 </template>
 
 

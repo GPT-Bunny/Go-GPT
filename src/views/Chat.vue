@@ -36,10 +36,12 @@
               <div v-if="message.sender === 'bot'" class="message-info">
                 <span>{{ message.timestamp }}</span>
               </div>
+              
               <!-- 仅机器人回复的消息包含复制按钮 -->
-              <div v-if="message.sender === 'bot'">
-                <n-button strong secondary circle type="warning" size="mini" style="background-color: transparent;" i
-                  class="fas fa-copy fa-sm  copy-icon" @click="copyMessage(message.content)" title="复制内容"></n-button>
+              <div v-if="message.sender === 'bot'"  >
+                <n-button strong secondary circle type="warning" size="mini"  i
+                  class="fas fa-copy fa-sm  copy-icon " @click="success(message.content)" title="复制内容">
+                </n-button>
               </div>
             </div>
           </div>
@@ -51,9 +53,7 @@
             <n-button strong secondary round type="info" @click="clearChat">清空</n-button>
           </div>
           <div class="send-message-area">
-            <textarea v-model="newMessage" @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4"
-              style="resize: none;"></textarea>
-            <!-- <n-button strong secondary round type="primary" @click="sendMessage" class="send-btn">发送</n-button> -->
+            <textarea v-model="newMessage" @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4" style="resize: none;"></textarea>
           </div>
         </n-card>
       </div>
@@ -63,6 +63,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useMessage } from 'naive-ui';
 
 const newMessage = ref('');
 const chats = ref([
@@ -124,14 +125,16 @@ const sendMessage = () => {
   }
 };
 
-const copyMessage = (text) => {
+const message = useMessage();
+
+const success = (text) => {
   navigator.clipboard.writeText(text)
     .then(() => {
-      console.log('Text copied to clipboard');
-      alert('复制成功'); // 复制成功提示
+      message.success('已复制到剪贴板');
     })
     .catch((error) => {
-      console.error('Error copying text: ', error);
+      console.error('复制文本时出错：', error);
+      message.error('复制失败，请重试');
     });
 };
 
@@ -162,6 +165,7 @@ const toggleSidebar = () => {
   isSidebarVisible.value = !isSidebarVisible.value; // 切换侧边栏显示/隐藏状态
 };
 </script>
+
 
 <style scoped>
 /* 添加标题栏样式 */
@@ -309,7 +313,7 @@ const toggleSidebar = () => {
   flex-direction: column;
   align-items: stretch;
   padding: 20px;
-  background-color: #ececec;
+  background-color: #dddddd;
 
   /* 左侧侧边栏的背景色 */
 }
@@ -324,7 +328,7 @@ const toggleSidebar = () => {
 
 
 .input-area {
-  background-color: #dedede;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
 }
@@ -338,24 +342,27 @@ const toggleSidebar = () => {
   display: flex;
   align-items: center;
 }
-
+.n-card{
+  width: 100%;
+}
 textarea {
+  width: 100%;
   flex: 1;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 10px;
-  height: 100px;
+  height: 90px;
   /* 固定输入框高度为 100 像素 */
 }
-
-n-button {
+/* 
+.n-button {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
+} */
 
 
 
@@ -451,7 +458,19 @@ n-button {
 
 .copy-icon {
   margin-left: 10px;
-  margin-top: 10px;
+  margin-top: 20px; /* 调整提示框向下的距离 */
 }
+
+.message-success {
+  background-color: #34b397;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 
 </style>
