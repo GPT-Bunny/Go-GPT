@@ -4,6 +4,7 @@
   <div>
     <Nav :options="options" />
     <router-view />
+
   </div>
 </template>
 

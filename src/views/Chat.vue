@@ -1,16 +1,13 @@
 <template>
   <div class="container">
     <div class="chat-container">
-
       <!-- 左侧边栏 -->
       <div v-if="!isSmallScreen && isSidebarVisible" class="sidebar">
-        <n-button strong secondary round type="primary" @click="createChat" class="create-chat-btn">+ 新建聊天</n-button>
-        <n-scrollbar style="max-height: 800px">
+        <n-button strong secondary round type="primary" @click="createChat" class="create-chat-btn">+ 新建对话</n-button>
+        <n-scrollbar style="max-height: 500px">
           <div v-for="(chat, index) in chats" :key="index">
             <div class="chat-header">
-              <button @click="selectChat(index)" :class="{ 'active': index === selectedChatIndex }" class="chat-btn">{{
-                chat.title }}</button>
-              <span class="edit-icon" @click="editChatTitle(index)">&#9998;</span>
+              <button @click="selectChat(index)" :class="{ 'active': index === selectedChatIndex }" class="chat-btn">{{ chat.title }}</button>
             </div>
           </div>
         </n-scrollbar>
@@ -36,21 +33,23 @@
               <div v-if="message.sender === 'bot'" class="message-info">
                 <span>{{ message.timestamp }}</span>
               </div>
-              
+
               <!-- 仅机器人回复的消息包含复制按钮 -->
-              <div v-if="message.sender === 'bot'"  >
-                <n-button strong secondary circle type="warning" size="mini"  i
-                  class="fas fa-copy fa-sm  copy-icon " @click="success(message.content)" title="复制内容">
-                </n-button>
+              <div v-if="message.sender === 'bot'">
+                <n-button strong secondary circle type="warning" size="mini" i class="fas fa-copy fa-sm  copy-icon " @click="success(message.content)" title="复制内容"></n-button>
               </div>
             </div>
           </div>
         </n-scrollbar>
 
         <!-- 输入框 -->
+        <n-divider />
+
         <n-card size="small" class="input-area">
           <div class="clear-button-area">
-            <n-button strong secondary round type="info" @click="clearChat">清空</n-button>
+            <n-button strong secondary round type="warning" @click="clearChat">
+              <i class="fas fa-trash"></i>
+            </n-button>
           </div>
           <div class="send-message-area">
             <textarea v-model="newMessage" @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4" style="resize: none;"></textarea>
@@ -64,10 +63,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useMessage } from 'naive-ui';
+import axios from 'axios';
 
 const newMessage = ref('');
 const chats = ref([
-  { title: '新建对话', messages: [] },
+  { title: '新的聊天', messages: [] },
 ]);
 const selectedChatIndex = ref(0);
 const isSmallScreen = ref(window.innerWidth < 900);
@@ -87,7 +87,7 @@ const handleResize = () => {
 };
 
 const createChat = () => {
-  const newChatTitle = `新建对话`;
+  const newChatTitle = `新的聊天`;
   chats.value.push({ title: newChatTitle, messages: [] });
   selectedChatIndex.value = chats.value.length - 1;
 };
@@ -107,23 +107,40 @@ const selectedChat = computed(() => chats.value[selectedChatIndex.value]);
 
 const selectedChatTitle = computed(() => selectedChat.value.title);
 
-const sendMessage = () => {
+
+const sendMessage = async () => {
   if (newMessage.value.trim() !== '') {
     selectedChat.value.messages.push({ sender: 'user', content: newMessage.value, avatar: 'src/assets/32x32.png' });
-    // Simulate bot response (you can replace this with actual API call)
-    setTimeout(() => {
+
+    try {
+      // 发送用户消息到 ChatGPT API
+      const response = await axios.post('http://localhost:8080/chat', {
+        messages: [
+          { role: 'user', content: newMessage.value },
+        ],
+        language: 'zh-CN',
+      });
+
+      // 提取机器人回复
       const botResponse = {
         sender: 'bot',
-        content: '你好，有什么可以帮助你的吗？',
+        content: response.data.reply,
         avatar: 'src/assets/32x32.png',
-        timestamp: new Date().toLocaleString(), // 添加时间戳
+        timestamp: new Date().toLocaleString(),
       };
+
+      // 将机器人回复添加到当前对话的消息列表
       selectedChat.value.messages.push(botResponse);
-      scrollToBottom(); // 确保滚动到底部
-    }, 500);
+      scrollToBottom(); // 滚动到底部
+    } catch (error) {
+      console.error('Failed to communicate with the server', error);
+    }
+
     newMessage.value = ''; // 清空输入框
   }
 };
+
+
 
 const message = useMessage();
 
@@ -167,6 +184,7 @@ const toggleSidebar = () => {
 </script>
 
 
+
 <style scoped>
 /* 添加标题栏样式 */
 .title-bar {
@@ -202,17 +220,17 @@ const toggleSidebar = () => {
 }
 
 
-
 .container {
+
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: calc(100vh - 90px);
+  height: calc(100vh - 40px);
   /* 使用calc函数减去导航栏的高度 */
-  padding-top: 90px;
+  padding-top: 40px;
   /* 用额外的上边距来弥补导航栏的高度 */
-  background-color: #000;
+  /* background-color: #2e1f1f; */
   /* 背景色 */
 }
 
@@ -227,11 +245,12 @@ const toggleSidebar = () => {
 }
 
 .sidebar {
+  max-width: 250px;
   flex: 1;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  background-color: #171717;
+  background-color: #0b0a0a;
   /* 墨绿色背景 */
   transition: width 0.3s ease;
   /* 添加过渡效果 */
@@ -248,16 +267,15 @@ const toggleSidebar = () => {
   width: 100%;
   padding: 20px;
   border: none;
-  border-radius: 5px;
   background-color: #1b8a72;
   color: rgb(0, 255, 195);
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
 
 }
 
 .icon-wrapper {
-  background-color: #e8e8e8;
+  background-color: #2c2c2c;
   /* 设置背景色 */
   padding: 5px;
   /* 设置内边距 */
@@ -274,11 +292,11 @@ const toggleSidebar = () => {
   align-items: center;
   /* 垂直居中 */
   cursor: pointer;
-  color: #000000;
+  color: #ffffff;
 }
 
 .icon-wrapper:hover {
-  background-color: #dbdbdb;
+  background-color: #1d1d1d;
   /* 设置鼠标悬停时的背景色 */
 }
 
@@ -313,12 +331,13 @@ const toggleSidebar = () => {
   flex-direction: column;
   align-items: stretch;
   padding: 20px;
-  background-color: #dddddd;
+  background-color: #1c1b25;
 
   /* 左侧侧边栏的背景色 */
 }
 
 .chat-title {
+  color: #ffffff;
   margin-top: 0;
   margin-bottom: 10px;
   text-align: left;
@@ -328,7 +347,7 @@ const toggleSidebar = () => {
 
 
 .input-area {
-  background-color: #ffffff;
+  background-color: #140523;
   display: flex;
   flex-direction: column;
 }
@@ -342,9 +361,12 @@ const toggleSidebar = () => {
   display: flex;
   align-items: center;
 }
-.n-card{
+
+.n-card {
+  border: none;
   width: 100%;
 }
+
 textarea {
   width: 100%;
   flex: 1;
@@ -356,6 +378,7 @@ textarea {
   height: 90px;
   /* 固定输入框高度为 100 像素 */
 }
+
 /* 
 .n-button {
   padding: 10px 20px;
@@ -380,7 +403,7 @@ textarea {
 }
 
 /* 隐藏侧边栏样式 */
-@media (max-width: 900px) {
+/* @media (max-width: 900px) {
   .sidebar {
     display: none;
   }
@@ -388,7 +411,7 @@ textarea {
   .chat-container {
     justify-content: flex-end;
   }
-}
+} */
 
 .title-bar {
   display: flex;
@@ -458,7 +481,8 @@ textarea {
 
 .copy-icon {
   margin-left: 10px;
-  margin-top: 20px; /* 调整提示框向下的距离 */
+  margin-top: 20px;
+  /* 调整提示框向下的距离 */
 }
 
 .message-success {
@@ -470,7 +494,4 @@ textarea {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-}
-
-
-</style>
+}</style>
