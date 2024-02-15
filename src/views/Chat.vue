@@ -140,8 +140,6 @@ const sendMessage = async () => {
   }
 };
 
-
-
 const message = useMessage();
 
 const success = (text) => {
