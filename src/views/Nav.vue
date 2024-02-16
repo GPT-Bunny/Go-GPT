@@ -1,9 +1,9 @@
 <template>
   <nav class="nav">
-    <div class="logo-container">
+    <router-link to="/home" class="logo-container">
       <img src="@/assets/32x32.png" alt="Logo" class="logo">
       <p class="logo-text">BUNNY</p>
-    </div>
+    </router-link>
 
     <router-link to="/home" >
       <n-button strong secondary round type="warning">

@@ -1,18 +1,16 @@
 <template>
   <div class="container">
     <div class="chat-container">
-
       <n-layout-sider collapse-mode="transform" :collapsed-width="0" :width="200" show-trigger="bar"
         content-style="padding: 24px;" borderedv-if="shouldShowSidebar">
         <n-button strong secondary round type="warning" @click="createChat" class="create-chat-btn">+ 新建对话</n-button>
-        <n-scrollbar style="max-height: 500px">
+        <n-scrollbar style="max-height: 800px">
           <div v-for="(chat, index) in chats" :key="index" class="chat-header">
             <n-button strong secondary round type="warning" @click="selectChat(index)"
               :class="{ 'active': index === selectedChatIndex }" class="chat-btn">{{ chat.title }}</n-button>
           </div>
         </n-scrollbar>
       </n-layout-sider>
-
       <div class="chat-window">
         <div v-show="isNewChatButtonVisible" class="new-chat-button">
           <n-button strong secondary round type="warning" @click="createChat">新建对话</n-button>
@@ -20,10 +18,9 @@
         <div v-show="isChatAreaVisible">
           <n-card size="small" hoverable>
             <h3>{{ selectedChatTitle }}</h3>
-            <!-- <span class="icon-wrapper" @click="toggleSidebar"><i class="fas fa-list"></i></span> -->
           </n-card>
 
-          <div style="height: 730px;  padding: 20px;">
+          <div style="height: 740px;  padding: 20px;">
             <n-scrollbar ref="messagesContainer" v-show="isChatListVisible" @scroll="handleScroll">
               <div v-for="(message, index) in selectedChat.messages" :key="index" class="message">
                 <div class="message-avatar">
@@ -44,14 +41,11 @@
           </div>
 
           <n-layout embedded content-style="padding: 10px;">
-
-              <n-button strong secondary round type="warning" @click="clearChat">
-                <i class="fas fa-trash"></i>
-              </n-button>
-
-              <textarea class="send-message-area" v-model="newMessage" @keydown="handleKeyPress"
-                placeholder="回车发送,ctrl+shift换行" rows="4" style="resize: none;"></textarea>
-
+            <n-button strong secondary round type="warning" @click="clearChat">
+              <i class="fas fa-trash"></i>
+            </n-button>
+            <n-input type="textarea"  ound clearable :autosize="{ minRows: 3 }" :value="newMessage" @update:value="updateNewMessage"
+              @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4"  />
           </n-layout>
         </div>
       </div>
@@ -63,6 +57,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useMessage } from 'naive-ui';
 import axios from 'axios';
+
 
 const newMessage = ref('');
 const chats = ref([]);
@@ -142,6 +137,9 @@ const sendMessage = async () => {
         language: 'zh-CN',
       });
 
+      // 模拟延迟，等待机器人回复
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       const botResponse = {
         sender: 'bot',
         content: response.data.reply,
@@ -158,6 +156,11 @@ const sendMessage = async () => {
       console.error('Failed to communicate with the server', error);
     }
   }
+};
+
+
+const updateNewMessage = (value) => {
+  newMessage.value = value;
 };
 
 const message = useMessage();
