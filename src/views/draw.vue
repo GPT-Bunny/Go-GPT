@@ -1,14 +1,15 @@
 <!-- Vue 3 template code -->
 <template>
-  <div>
-    <!-- Your existing Vue code here -->
+      <n-layout-sider
+        collapse-mode="transform"
+        :collapsed-width="120"
+        :width="240"
+        show-trigger="bar"
+        content-style="padding: 24px;"
+        bordered
+      >
+      </n-layout-sider>
 
-    <div  style="padding-top: 100px;">
-      <input v-model="message" placeholder="Type your message">
-      <button @click="sendMessage">Send</button>
-      <div v-if="chatResponse">{{ chatResponse }}</div>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -37,3 +38,8 @@ const sendMessage = async () => {
 };
 </script>
 
+<style>
+.n-layout-sider{
+  padding-top: 100px;
+}
+</style>

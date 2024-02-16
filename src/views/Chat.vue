@@ -1,78 +1,76 @@
 <template>
   <div class="container">
     <div class="chat-container">
-      <!-- 左侧边栏 -->
-      <div v-if="!isSmallScreen && isSidebarVisible" class="sidebar">
-        <n-button strong secondary round type="primary" @click="createChat" class="create-chat-btn">+ 新建对话</n-button>
+
+      <n-layout-sider collapse-mode="transform" :collapsed-width="0" :width="200" show-trigger="bar"
+        content-style="padding: 24px;" borderedv-if="shouldShowSidebar">
+        <n-button strong secondary round type="warning" @click="createChat" class="create-chat-btn">+ 新建对话</n-button>
         <n-scrollbar style="max-height: 500px">
-          <div v-for="(chat, index) in chats" :key="index">
-            <div class="chat-header">
-              <button @click="selectChat(index)" :class="{ 'active': index === selectedChatIndex }" class="chat-btn">{{ chat.title }}</button>
-            </div>
+          <div v-for="(chat, index) in chats" :key="index" class="chat-header">
+            <n-button strong secondary round type="warning" @click="selectChat(index)"
+              :class="{ 'active': index === selectedChatIndex }" class="chat-btn">{{ chat.title }}</n-button>
           </div>
         </n-scrollbar>
-      </div>
+      </n-layout-sider>
 
-      <!-- 右侧区域 -->
-      <!-- 右侧标题 -->
       <div class="chat-window">
-        <div class="title-bar" style="border-bottom: 1px solid #ccc;">
-          <h3 class="chat-title">{{ selectedChatTitle }}</h3>
-          <span class="icon-wrapper" @click="toggleSidebar"><i class="fas fa-list"></i></span>
+        <div v-show="isNewChatButtonVisible" class="new-chat-button">
+          <n-button strong secondary round type="warning" @click="createChat">新建对话</n-button>
         </div>
+        <div v-show="isChatAreaVisible">
+          <n-card size="small" hoverable>
+            <h3>{{ selectedChatTitle }}</h3>
+            <!-- <span class="icon-wrapper" @click="toggleSidebar"><i class="fas fa-list"></i></span> -->
+          </n-card>
 
-        <!-- 聊天内容 -->
-        <n-scrollbar class="messages" ref="messagesContainer" v-show="isChatListVisible">
-          <!-- 机器人回复的消息 -->
-          <div v-for="(message, index) in selectedChat.messages" :key="index" class="message">
-            <div class="message-avatar">
-              <img :src="message.avatar" class="avatar" alt="avatar">
-            </div>
-            <div :class="message.sender === 'user' ? 'user-message' : 'bot-message'">
-              {{ message.content }}
-              <div v-if="message.sender === 'bot'" class="message-info">
-                <span>{{ message.timestamp }}</span>
+          <div style="height: 730px;  padding: 20px;">
+            <n-scrollbar ref="messagesContainer" v-show="isChatListVisible" @scroll="handleScroll">
+              <div v-for="(message, index) in selectedChat.messages" :key="index" class="message">
+                <div class="message-avatar">
+                  <img :src="message.avatar" class="avatar" alt="avatar">
+                </div>
+                <div :class="message.sender === 'user' ? 'user-message' : 'bot-message'">
+                  {{ message.content }}
+                  <div v-if="message.sender === 'bot'" class="message-info">
+                    <span>{{ message.timestamp }}</span>
+                  </div>
+                  <div v-if="message.sender === 'bot'">
+                    <n-button strong secondary circle type="warning" size="mini" class="fas fa-copy fa-sm copy-icon"
+                      @click="copyToClipboard(message.content)" title="复制内容"></n-button>
+                  </div>
+                </div>
               </div>
-
-              <!-- 仅机器人回复的消息包含复制按钮 -->
-              <div v-if="message.sender === 'bot'">
-                <n-button strong secondary circle type="warning" size="mini" i class="fas fa-copy fa-sm  copy-icon " @click="success(message.content)" title="复制内容"></n-button>
-              </div>
-            </div>
+            </n-scrollbar>
           </div>
-        </n-scrollbar>
 
-        <!-- 输入框 -->
-        <n-divider />
+          <n-layout embedded content-style="padding: 10px;">
 
-        <n-card size="small" class="input-area">
-          <div class="clear-button-area">
-            <n-button strong secondary round type="warning" @click="clearChat">
-              <i class="fas fa-trash"></i>
-            </n-button>
-          </div>
-          <div class="send-message-area">
-            <textarea v-model="newMessage" @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4" style="resize: none;"></textarea>
-          </div>
-        </n-card>
+              <n-button strong secondary round type="warning" @click="clearChat">
+                <i class="fas fa-trash"></i>
+              </n-button>
+
+              <textarea class="send-message-area" v-model="newMessage" @keydown="handleKeyPress"
+                placeholder="回车发送,ctrl+shift换行" rows="4" style="resize: none;"></textarea>
+
+          </n-layout>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useMessage } from 'naive-ui';
 import axios from 'axios';
 
 const newMessage = ref('');
-const chats = ref([
-  { title: '新的聊天', messages: [] },
-]);
-const selectedChatIndex = ref(0);
+const chats = ref([]);
+const selectedChatIndex = ref(-1);
 const isSmallScreen = ref(window.innerWidth < 900);
 const isChatListVisible = ref(true);
-const isSidebarVisible = ref(true); // 新增侧边栏显示/隐藏状态
+const isSidebarVisible = ref(true);
+let isScrollLocked = ref(true);
 
 onMounted(() => {
   window.addEventListener('resize', handleResize);
@@ -86,10 +84,25 @@ const handleResize = () => {
   isSmallScreen.value = window.innerWidth < 900;
 };
 
+const generateChatId = () => {
+  return `${botMessagePrefix}-${messageCounter++}`;
+};
+
 const createChat = () => {
   const newChatTitle = `新的聊天`;
-  chats.value.push({ title: newChatTitle, messages: [] });
-  selectedChatIndex.value = chats.value.length - 1;
+  const welcomeMessage = {
+    sender: 'bot',
+    content: '欢迎使用聊天机器人！请开始你的聊天吧。',
+    avatar: 'src/assets/32x32.png',
+    timestamp: new Date().toLocaleString(),
+    id: generateChatId(),
+  };
+
+  const newChat = { title: newChatTitle, messages: [welcomeMessage] };
+  chats.value.push(newChat); // 添加新的聊天对象到数组中
+  selectedChatIndex.value = chats.value.length - 1; // 选中新的聊天
+  isNewChatButtonVisible.value = false;
+  isChatAreaVisible.value = true;
 };
 
 const selectChat = (index) => {
@@ -103,46 +116,53 @@ const editChatTitle = (index) => {
   }
 };
 
-const selectedChat = computed(() => chats.value[selectedChatIndex.value]);
+const selectedChat = computed(() => selectedChatIndex.value === -1 ? {} : chats.value[selectedChatIndex.value]);
 
 const selectedChatTitle = computed(() => selectedChat.value.title);
 
+const userMessagePrefix = 'user';
+const botMessagePrefix = 'bot';
+let messageCounter = 0;
 
 const sendMessage = async () => {
   if (newMessage.value.trim() !== '') {
-    selectedChat.value.messages.push({ sender: 'user', content: newMessage.value, avatar: 'src/assets/32x32.png' });
+    const isFirstUserMessage = selectedChat.value.messages.length === 1 && selectedChat.value.messages[0].sender === 'bot';
+
+    if (isFirstUserMessage) {
+      selectedChat.value.messages.shift();
+    }
+
+    const userMessage = { sender: 'user', content: newMessage.value, avatar: 'src/assets/32x32.png', id: `${userMessagePrefix}-${messageCounter++}` };
+    selectedChat.value.messages.push(userMessage);
+    newMessage.value = '';
 
     try {
-      // 发送用户消息到 ChatGPT API
       const response = await axios.post('http://localhost:8080/chat', {
-        messages: [
-          { role: 'user', content: newMessage.value },
-        ],
+        messages: [{ role: 'user', content: userMessage.content }],
         language: 'zh-CN',
       });
 
-      // 提取机器人回复
       const botResponse = {
         sender: 'bot',
         content: response.data.reply,
         avatar: 'src/assets/32x32.png',
         timestamp: new Date().toLocaleString(),
+        id: `${botMessagePrefix}-${messageCounter++}`,
       };
 
-      // 将机器人回复添加到当前对话的消息列表
       selectedChat.value.messages.push(botResponse);
-      scrollToBottom(); // 滚动到底部
+
+      await nextTick();
+      scrollToBottom();
     } catch (error) {
       console.error('Failed to communicate with the server', error);
     }
-
-    newMessage.value = ''; // 清空输入框
   }
 };
 
 const message = useMessage();
 
-const success = (text) => {
+const copyToClipboard = (text) => {
   navigator.clipboard.writeText(text)
     .then(() => {
       message.success('已复制到剪贴板');
@@ -168,328 +188,32 @@ const clearChat = () => {
 };
 
 const scrollToBottom = () => {
-  const messagesContainer = document.querySelector('.messages');
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  if (isScrollLocked) {
+    const messagesContainer = document.querySelector('.messages');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }
 };
 
-const toggleChatList = () => {
-  isChatListVisible.value = !isChatListVisible.value;
+const handleScroll = () => {
+  const messagesContainer = document.querySelector('.messages');
+  isScrollLocked.value = messagesContainer.scrollTop === messagesContainer.scrollHeight - messagesContainer.clientHeight;
 };
 
 const toggleSidebar = () => {
-  isSidebarVisible.value = !isSidebarVisible.value; // 切换侧边栏显示/隐藏状态
+  isSidebarVisible.value = !isSidebarVisible.value;
 };
+
+const isNewChatButtonVisible = ref(true);
+const isChatAreaVisible = ref(false);
+
+// 计算属性
+const shouldShowSidebar = computed(() => !isSmallScreen.value && isSidebarVisible.value);
+
 </script>
 
 
-
 <style scoped>
-/* 添加标题栏样式 */
-.title-bar {
-  padding: 10px;
-  height: auto;
-  min-height: 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-
-
-/* 消息样式 */
-.message {
-  margin-top: 25px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.message-avatar {
-  margin-right: 10px;
-}
-
-.avatar {
-  width: 40px;
-  /* 头像宽度 */
-  height: 40px;
-  /* 头像高度 */
-  border-radius: 50%;
-  /* 圆形头像 */
-}
-
-
-.container {
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: calc(100vh - 40px);
-  /* 使用calc函数减去导航栏的高度 */
-  padding-top: 40px;
-  /* 用额外的上边距来弥补导航栏的高度 */
-  /* background-color: #2e1f1f; */
-  /* 背景色 */
-}
-
-.chat-container {
-  display: flex;
-  width: 100%;
-  /* 修改为和页面一样大 */
-  height: 100%;
-  /* 修改为和页面一样大 */
-  border: none;
-  /* 或者 border: 1px solid transparent; */
-}
-
-.sidebar {
-  max-width: 250px;
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  background-color: #0b0a0a;
-  /* 墨绿色背景 */
-  transition: width 0.3s ease;
-  /* 添加过渡效果 */
-}
-
-.sidebar.hidden {
-  width: 0;
-  /* 隐藏侧边栏 */
-  padding: 0;
-  /* 隐藏内边距 */
-}
-
-.create-chat-btn {
-  width: 100%;
-  padding: 20px;
-  border: none;
-  background-color: #1b8a72;
-  color: rgb(0, 255, 195);
-  cursor: pointer;
-  margin-bottom: 50px;
-
-}
-
-.icon-wrapper {
-  background-color: #2c2c2c;
-  /* 设置背景色 */
-  padding: 5px;
-  /* 设置内边距 */
-  width: 30px;
-  /* 设置宽度 */
-  height: 30px;
-  /* 设置高度 */
-  border-radius: 50%;
-  /* 设置圆角半径 */
-  display: flex;
-  /* 让内容居中 */
-  justify-content: center;
-  /* 水平居中 */
-  align-items: center;
-  /* 垂直居中 */
-  cursor: pointer;
-  color: #ffffff;
-}
-
-.icon-wrapper:hover {
-  background-color: #1d1d1d;
-  /* 设置鼠标悬停时的背景色 */
-}
-
-
-.chat-btn {
-  width: calc(100% - 30px);
-  /* 聊天记录按钮宽度减去修改按钮的宽度 */
-  padding: 10px;
-  margin-bottom: 5px;
-  border: none;
-  border-radius: 5px;
-  background-color: #268e7c;
-  color: black;
-  cursor: pointer;
-}
-
-.chat-btn.active {
-  background-color: #28d89b;
-}
-
-.edit-icon {
-  cursor: pointer;
-  margin-left: 10px;
-  color: #ffffff;
-  /* 修改图标颜色 */
-}
-
-/* 右侧内容背景色与侧边栏相同 */
-.chat-window {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  padding: 20px;
-  background-color: #1c1b25;
-
-  /* 左侧侧边栏的背景色 */
-}
-
-.chat-title {
-  color: #ffffff;
-  margin-top: 0;
-  margin-bottom: 10px;
-  text-align: left;
-  /* 标题左对齐 */
-}
-
-
-
-.input-area {
-  background-color: #140523;
-  display: flex;
-  flex-direction: column;
-}
-
-.clear-button-area {
-  margin-bottom: 10px;
-  /* 清空按钮下边距 */
-}
-
-.send-message-area {
-  display: flex;
-  align-items: center;
-}
-
-.n-card {
-  border: none;
-  width: 100%;
-}
-
-textarea {
-  width: 100%;
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 15px;
-  margin-top: 10px;
-  height: 90px;
-  /* 固定输入框高度为 100 像素 */
-}
-
-/* 
-.n-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-} */
-
-
-
-.send-btn {
-
-  margin-left: 10px;
-  /* 发送按钮左边距 */
-  background-color: #34b397;
-  color: rgb(255, 255, 255);
-}
-
-.send-btn:hover {
-  color: rgb(255, 255, 255);
-  background-color: #159378;
-}
-
-/* 隐藏侧边栏样式 */
-/* @media (max-width: 900px) {
-  .sidebar {
-    display: none;
-  }
-
-  .chat-container {
-    justify-content: flex-end;
-  }
-} */
-
-.title-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.toggle-icon {
-  cursor: pointer;
-  font-size: 20px;
-  color: #34b397;
-  /* 图标颜色 */
-}
-
-
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  max-height: 800px;
-  padding: 10px;
-  /* 添加内边距 */
-  background-color: #ececec;
-  /* 设置背景色 */
-}
-
-.message {
-  display: flex;
-  align-items: flex-start;
-  /* 在交叉轴上顶部对齐 */
-  margin-bottom: 10px;
-}
-
-.message-avatar {
-  margin-right: 10px;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.user-message,
-.bot-message {
-  display: flex;
-  flex-direction: column;
-  /* 将消息内容垂直排列 */
-  background-color: #d6d6d6;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.bot-message {
-  background-color: #141847;
-  color: #ffffff;
-}
-
-.message-info {
-  display: flex;
-  align-items: center;
-  color: #999;
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-.copy-icon {
-  margin-left: 10px;
-  margin-top: 20px;
-  /* 调整提示框向下的距离 */
-}
-
-.message-success {
-  background-color: #34b397;
-  color: #fff;
-  border-radius: 5px;
-  padding: 10px 20px;
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-}</style>
+@import url(Chat.css);
+</style>
