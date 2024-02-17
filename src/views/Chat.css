@@ -16,6 +16,49 @@ font-size: 15px;
 color: #ffffff;
 background-color: #2e2e2e;
 resize: none; */
+.ChatLog{
+  height: auto;
+  padding: 20px;
+  min-height: 700px;
+}
+
+.select {
+  display: inline-block;
+  position: relative;
+  min-width: 100px;
+  text-align: center;
+  height: 33px;
+  background-color: #564431;
+  color: #ffad50;
+  border-radius: 100px;
+  margin-left: 15px;
+  border: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 5px 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
+  overflow: hidden; /* 隐藏溢出部分 */
+}
+
+.select select {
+  position: absolute;
+  top: -100%;
+  transform: translateY(-100%);
+  opacity: 0; /* 隐藏原生的下拉框 */
+  width: 100%;
+  height: 100%;
+}
+
+.select:hover {
+  background-color: #6e5b49;
+  cursor: pointer;
+}
+
+
+
 
 .n-input {
   color: #ffffff;
@@ -41,8 +84,10 @@ resize: none; */
   background-color: #0b0a0a;
 }
 .n-layout-sider{
+  padding-top: 50px;
   background-color: #0b0a0a;
 }
+
 /* 添加标题栏样式 */
 .title-bar {
   padding: 10px;
@@ -63,7 +108,7 @@ resize: none; */
   font-size: 20px;
 }
 
-/* 消息样式 */
+/* 消息样式
 .message {
   margin-top: 25px;
   display: flex;
@@ -73,7 +118,7 @@ resize: none; */
 
 .message-avatar {
   margin-right: 10px;
-}
+} */
 
 .avatar {
   width: 40px;
@@ -225,8 +270,8 @@ resize: none; */
 
 
 
-/*
-.n-button {
+
+/* .n-button {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;

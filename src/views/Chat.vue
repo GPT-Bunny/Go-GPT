@@ -2,7 +2,7 @@
   <div class="container">
     <div class="chat-container">
       <n-layout-sider collapse-mode="transform" :collapsed-width="0" :width="200" show-trigger="bar"
-        content-style="padding: 24px;" borderedv-if="shouldShowSidebar">
+        content-style="padding: 24px;"  v-if="shouldShowSidebar">
         <n-button strong secondary round type="warning" @click="createChat" class="create-chat-btn">+ 新建对话</n-button>
         <n-scrollbar style="max-height: 800px">
           <div v-for="(chat, index) in chats" :key="index" class="chat-header">
@@ -11,16 +11,18 @@
           </div>
         </n-scrollbar>
       </n-layout-sider>
+
+
       <div class="chat-window">
         <div v-show="isNewChatButtonVisible" class="new-chat-button">
           <n-button strong secondary round type="warning" @click="createChat">新建对话</n-button>
         </div>
         <div v-show="isChatAreaVisible">
+          <!-- ... 其他聊天窗口的代码 ... -->
           <n-card size="small" hoverable>
-            <h3>{{ selectedChatTitle }}</h3>
+            <h3> {{ selectedChatTitle }}</h3>
           </n-card>
-
-          <div style="height: 740px;  padding: 20px;">
+          <div style="height: 730px;  padding: 20px;">
             <n-scrollbar ref="messagesContainer" v-show="isChatListVisible" @scroll="handleScroll">
               <div v-for="(message, index) in selectedChat.messages" :key="index" class="message">
                 <div class="message-avatar">
@@ -44,8 +46,15 @@
             <n-button strong secondary round type="warning" @click="clearChat">
               <i class="fas fa-trash"></i>
             </n-button>
-            <n-input type="textarea"  ound clearable :autosize="{ minRows: 3 }" :value="newMessage" @update:value="updateNewMessage"
-              @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4"  />
+
+            <select v-model="selectedModel" @change="handleChangeModel" class="select">
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="gpt-3.5-turbo-1106">gpt-3.5-turbo-1106</option>
+              <option value="gpt-4.0">GPT-4.0</option>
+            </select>
+
+            <n-input type="textarea" ound clearable :autosize="{ minRows: 3 }" :value="newMessage"
+              @update:value="updateNewMessage" @keydown="handleKeyPress" placeholder="回车发送,ctrl+shift换行" rows="4" />
           </n-layout>
         </div>
       </div>
@@ -59,6 +68,11 @@ import { useMessage } from 'naive-ui';
 import axios from 'axios';
 
 
+
+const messagesContainerRef = ref(null);
+
+
+
 const newMessage = ref('');
 const chats = ref([]);
 const selectedChatIndex = ref(-1);
@@ -66,6 +80,33 @@ const isSmallScreen = ref(window.innerWidth < 900);
 const isChatListVisible = ref(true);
 const isSidebarVisible = ref(true);
 let isScrollLocked = ref(true);
+
+const selectedModel = ref('gpt-3.5-turbo');
+
+const handleChangeModel = async () => {
+  try {
+    // 确保在发送请求之前获取 selectedModel 的值
+    const modelValue = selectedModel.value;
+
+    const response = await axios.post('http://localhost:8080/set-model', {
+      model: modelValue,
+    });
+
+    // 处理后端返回的响应（如果有需要的话）
+    console.log(response.data);
+  } catch (error) {
+    console.error('Failed to communicate with the server', error);
+  }
+};
+
+const messagesContainer = document.querySelector('.messages');
+if (messagesContainer) {
+  // 如果找到了元素，执行接下来的代码
+  isScrollLocked.value = messagesContainer.scrollTop === messagesContainer.scrollHeight - messagesContainer.clientHeight;
+}
+
+
+
 
 onMounted(() => {
   window.addEventListener('resize', handleResize);
@@ -201,8 +242,13 @@ const scrollToBottom = () => {
 
 const handleScroll = () => {
   const messagesContainer = document.querySelector('.messages');
-  isScrollLocked.value = messagesContainer.scrollTop === messagesContainer.scrollHeight - messagesContainer.clientHeight;
+
+  // 添加安全检查，确保 messagesContainer 存在
+  if (messagesContainer) {
+    isScrollLocked.value = messagesContainer.scrollTop === messagesContainer.scrollHeight - messagesContainer.clientHeight;
+  }
 };
+
 
 const toggleSidebar = () => {
   isSidebarVisible.value = !isSidebarVisible.value;

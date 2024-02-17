@@ -1,6 +1,7 @@
 #!/bin/bash
 
-
+# 初始化本地仓库
+git init
 
 # 将文件添加到暂存区
 git add .
