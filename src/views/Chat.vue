@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="chat-container">
-      <n-layout-sider collapse-mode="transform" :collapsed-width="0" :width="200" show-trigger="bar"
+      <n-layout-sider collapse-mode="transform" :collapsed-width="0" :width="300" show-trigger="bar"
         content-style="padding: 24px;"  v-if="shouldShowSidebar">
         <n-button strong secondary round type="warning" @click="createChat" class="create-chat-btn">+ 新建对话</n-button>
         <n-scrollbar style="max-height: 800px">

@@ -10,7 +10,7 @@ import { faHome, faComment, faPaintBrush, faUsers } from '@fortawesome/free-soli
 import MarkdownIt from 'markdown-it';
 import naive from 'naive-ui'
 import PrimeVue from 'primevue/config'; // 追加 PrimeVue import
-
+import store from './store';
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
@@ -18,7 +18,7 @@ app.use(router);
 library.add(faHome, faComment, faPaintBrush, faUsers);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(naive)
-
+app.use(store);
 
 const md = new MarkdownIt();
 const markdownText = '# Hello, *world*!';

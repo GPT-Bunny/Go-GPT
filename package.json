@@ -33,7 +33,8 @@
     "vue-clipboard2": "^0.3.3",
     "vue-markdown": "^2.2.4",
     "vue-native-websocket": "^2.0.15",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",

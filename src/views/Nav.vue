@@ -23,6 +23,12 @@
       </n-button>
     </router-link>
 
+    <router-link to="/admin" >
+      <n-button strong secondary round type="warning">
+        <i class="fas fa-wrench" > 管理</i>
+      </n-button>
+    </router-link>
+
       <router-link to="/login">
         <n-button strong secondary round type="warning"  class="login">
           <i class="fas fa-sign-in-alt" > 登录</i>
