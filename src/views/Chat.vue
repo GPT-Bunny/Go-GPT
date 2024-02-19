@@ -12,18 +12,16 @@
         </n-scrollbar>
       </n-layout-sider>
 
-
       <div class="chat-window">
         <div v-show="isNewChatButtonVisible" class="new-chat-button">
           <n-button strong secondary round type="warning" @click="createChat">新建对话</n-button>
         </div>
         <div v-show="isChatAreaVisible">
-          <!-- ... 其他聊天窗口的代码 ... -->
           <n-card size="small" hoverable>
             <h3> {{ selectedChatTitle }}</h3>
           </n-card>
           <div style="height: 730px;  padding: 20px;">
-            <n-scrollbar ref="messagesContainer" v-show="isChatListVisible" @scroll="handleScroll">
+            <n-scrollbar ref="messagesContainerRef" v-show="isChatListVisible" @scroll="handleScroll">
               <div v-for="(message, index) in selectedChat.messages" :key="index" class="message">
                 <div class="message-avatar">
                   <img :src="message.avatar" class="avatar" alt="avatar">
@@ -68,6 +66,53 @@ import { useMessage } from 'naive-ui';
 import axios from 'axios';
 
 
+const ws = ref(null);
+
+onMounted(() => {
+  // 建立 WebSocket 连接
+  ws.value = new WebSocket('ws://localhost:8080/ws');
+
+  // 监听从服务器接收到的消息
+  ws.value.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    // 假设服务器发送的消息格式是 { sender: 'bot', content: '...' }
+    // 这里可以根据实际情况调整
+    if (message.sender === 'bot') {
+      // 将消息添加到聊天中
+      selectedChat.value.messages.push({
+        sender: 'bot',
+        content: message.content,
+        avatar: 'src/assets/32x32.png',
+        timestamp: new Date().toLocaleString(),
+        id: generateChatId(),
+      });
+    }
+  };
+
+  // 监听 WebSocket 错误事件
+  ws.value.onerror = (error) => {
+    console.error('WebSocket Error', error);
+  };
+
+  // 监听 WebSocket 连接关闭事件
+  ws.value.onclose = (event) => {
+    console.log('WebSocket Connection Closed', event);
+  };
+});
+
+onUnmounted(() => {
+  // 组件卸载时关闭 WebSocket 连接
+  if (ws.value) {
+    ws.value.close();
+  }
+});
+
+// 发送消息到服务器的函数
+const sendWebSocketMessage = (messageContent) => {
+  if (ws.value && ws.value.readyState === WebSocket.OPEN) {
+    ws.value.send(JSON.stringify({ content: messageContent }));
+  }
+};
 
 const messagesContainerRef = ref(null);
 
@@ -170,6 +215,8 @@ const sendMessage = async () => {
 
     const userMessage = { sender: 'user', content: newMessage.value, avatar: 'src/assets/32x32.png', id: `${userMessagePrefix}-${messageCounter++}` };
     selectedChat.value.messages.push(userMessage);
+    sendWebSocketMessage(userMessage.content);
+
     newMessage.value = '';
 
     try {
@@ -232,13 +279,11 @@ const clearChat = () => {
 };
 
 const scrollToBottom = () => {
-  if (isScrollLocked) {
-    const messagesContainer = document.querySelector('.messages');
-    if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+  if (isScrollLocked.value && messagesContainerRef.value) {
+    messagesContainerRef.value.scrollTop = messagesContainerRef.value.scrollHeight;
   }
 };
+
 
 const handleScroll = () => {
   const messagesContainer = document.querySelector('.messages');
