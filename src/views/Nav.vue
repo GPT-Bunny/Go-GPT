@@ -30,13 +30,13 @@
     </router-link>
 
       <router-link to="/login">
-        <n-button strong secondary round type="warning"  class="login">
-          <i class="fas fa-sign-in-alt" > 登录</i>
-        </n-button>
+          <auth-button   />
       </router-link>
-
   </nav>
 </template>
+<script setup>
+import AuthButton from '@/components/AuthButton.vue';
+</script>
 <style  scoped>
 @import url('Nav.css');
 </style>
