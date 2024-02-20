@@ -1,115 +1,40 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
+	auth "go-gpt/api"   // 导入自定义的auth包，处理认证相关逻辑
+	openai "go-gpt/api" // 导入自定义的openai包，处理与OpenAI相关的逻辑
+
+	"github.com/gin-contrib/cors" // 导入CORS中间件
+	"github.com/gin-gonic/gin"    // 导入Gin框架
 )
 
-// CORS 中间件函数
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 设置 CORS 头部
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
 func main() {
-	// 设置中转接口地址和 API Key
-	apiURL := "https://api.nextapi.fun"
-	apiKey := "ak-yPIAfSUvEUdhjD8UbAtKqlTRdDf3L7dPxT5ZqfOpgO7XCAnm"
+	// 初始化数据库连接
+	err := auth.InitDB("go-gpt:go-gpt@tcp(127.0.0.1:3306)/go-gpt")
+	if err != nil {
+		panic(err) // 如果初始化失败，则抛出异常
+	}
+	defer auth.CloseDB() // 确保在main函数结束时关闭数据库连接
 
-	// 创建路由处理器
-	http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
-		// 从前端接收 JSON 请求
-		var requestData map[string]interface{}
-		err := json.NewDecoder(r.Body).Decode(&requestData)
-		if err != nil {
-			http.Error(w, "Failed to decode JSON request", http.StatusBadRequest)
-			return
-		}
+	r := gin.Default() // 创建一个Gin引擎实例
 
-		// 构建请求数据
-		data := map[string]interface{}{
-			"model":    "gpt-3.5-turbo",
-			"messages": requestData["messages"],
-		}
+	// 使用 CORS 中间件允许跨域请求
+	r.Use(cors.Default())
 
-		// 将请求数据转换为 JSON
-		payload, err := json.Marshal(data)
-		if err != nil {
-			http.Error(w, "JSON marshal error", http.StatusInternalServerError)
-			return
-		}
+	// 注册登录和注册的路由处理函数
+	r.POST("/login", auth.HandleLogin)
+	r.POST("/register", auth.HandleRegister)
 
-		// 创建 HTTP 客户端
-		client := &http.Client{}
-
-		// 创建 POST 请求到 ChatGPT API
-		req, err := http.NewRequest("POST", apiURL+"/v1/chat/completions", bytes.NewBuffer(payload))
-		if err != nil {
-			http.Error(w, "HTTP request error", http.StatusInternalServerError)
-			return
-		}
-
-		// 添加 ChatGPT API Key 到请求头
-		req.Header.Set("Authorization", "Bearer "+apiKey)
-		req.Header.Set("Content-Type", "application/json")
-
-		// 发送请求
-		resp, err := client.Do(req)
-		if err != nil {
-			http.Error(w, "HTTP request error", http.StatusInternalServerError)
-			return
-		}
-		defer resp.Body.Close()
-
-		// 解析响应数据
-		var response map[string]interface{}
-		err = json.NewDecoder(resp.Body).Decode(&response)
-		if err != nil {
-			http.Error(w, "JSON unmarshal error", http.StatusInternalServerError)
-			return
-		}
-
-		// 提取生成的回复
-		choices, ok := response["choices"].([]interface{})
-		if !ok || len(choices) == 0 {
-			http.Error(w, "Invalid response from ChatGPT API", http.StatusInternalServerError)
-			return
-		}
-
-		message, ok := choices[0].(map[string]interface{})["message"].(map[string]interface{})
-		if !ok {
-			http.Error(w, "Invalid response format from ChatGPT API", http.StatusInternalServerError)
-			return
-		}
-
-		reply, ok := message["content"].(string)
-		if !ok {
-			http.Error(w, "Invalid reply format from ChatGPT API", http.StatusInternalServerError)
-			return
-		}
-
-		// 返回回复给前端
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"reply": reply})
+	// 注册聊天和设置模型的路由处理函数
+	r.POST("/chat", func(c *gin.Context) {
+		openai.ChatHandler(c.Writer, c.Request) // 聊天处理函数
+	})
+	r.POST("/set-model", func(c *gin.Context) {
+		openai.SetModelHandler(c.Writer, c.Request) // 设置模型处理函数
 	})
 
-	// 使用中间件处理 CORS 头部
-	handler := corsMiddleware(http.DefaultServeMux)
-
-	// 启动服务器
+	// 启动服务器，并在8080端口监听
 	fmt.Println("Server is running on http://localhost:8080")
-	http.ListenAndServe(":8080", handler)
+	r.Run(":8080") // 监听并在 0.0.0.0:8080 上启动服务
 }
