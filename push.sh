@@ -14,8 +14,6 @@ fi
 # 初始化本地仓库
 git init
 
-# 添加远程仓库
-git remote add origin $REMOTE_REPO_URL
 
 # 添加所有文件到暂存区
 git add .
