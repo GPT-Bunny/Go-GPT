@@ -1,0 +1,54 @@
+.nav {
+  background-color: #161616;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  z-index: 1000; /* 设置较高的 z-index 值 */
+}
+
+/* 导航链接样式 */
+.nav-link {
+  text-decoration: none;
+}
+
+.n-button {
+  background-color: #161616;
+  color: #919191;
+  margin-right: 30px; /* 调整 logo 和文本之间的间距 */
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin-right: 20px; /* 调整 logo 和文本之间的间距 */
+}
+
+.logo {
+  width: 40px; /* 调整 logo 的宽度 */
+  height: 40px; /* 调整 logo 的高度 */
+  margin-right: 10px; /* 调整 logo 和文本之间的间距 */
+}
+
+.logo-text {
+  font-size: 15px; /* 调整文本的字体大小 */
+  font-weight: bold; /* 调整文本的字体粗细 */
+  color: #ffffff;
+}
+
+.login {
+  background-color: #856114;
+  color: #ffd967;
+}
+
+/* 激活时的样式 */
+.router-link-active .n-button {
+  /* 在这里定义激活时的样式 */
+  background-color: #a8751d;
+  color: #ffd56a;
+}
